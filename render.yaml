@@ -5,8 +5,8 @@ services:
     region: oregon
     plan: free
     rootDir: .
-    buildCommand: corepack enable && corepack prepare pnpm@latest --activate && pnpm install
-    startCommand: pnpm --filter @workspace/discord-bot run start
+    buildCommand: npm install -g pnpm --prefix=$HOME && $HOME/bin/pnpm install
+    startCommand: $HOME/bin/pnpm --filter @workspace/discord-bot run start
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
