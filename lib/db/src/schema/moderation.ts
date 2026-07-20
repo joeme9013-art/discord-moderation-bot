@@ -93,6 +93,7 @@ export type InactivityWarning = typeof inactivityWarningsTable.$inferSelect;
 export const guildSettingsTable = pgTable("guild_settings", {
   id: serial("id").primaryKey(),
   guildId: text("guild_id").notNull().unique(),
+  logChannelId: text("log_channel_id"),
   inactivityDays: integer("inactivity_days").notNull().default(7),
   warningsBeforeDemote: integer("warnings_before_demote").notNull().default(3),
   inactivityEnabled: boolean("inactivity_enabled").notNull().default(true),

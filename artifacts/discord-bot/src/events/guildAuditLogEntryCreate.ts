@@ -7,7 +7,8 @@ import {
   TextChannel,
   AuditLogOptionsType,
 } from "discord.js";
-import { db, modLogsTable } from "@workspace/db";
+import { db, modLogsTable, guildSettingsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 import { awardCredits, ACTION_CREDITS } from "../lib/credits.js";
 import { checkAndPromote } from "../lib/roles.js";
 
@@ -107,7 +108,15 @@ async function processAction(
   if (executorId === targetId) return;
 
   const guildId = guild.id;
-  const logChannelId = process.env.DISCORD_LOG_CHANNEL_ID;
+
+  // Read log channel from DB, fall back to env var
+  const settingsRow = await db
+    .select()
+    .from(guildSettingsTable)
+    .where(eq(guildSettingsTable.guildId, guildId))
+    .limit(1);
+  const logChannelId =
+    settingsRow[0]?.logChannelId ?? process.env.DISCORD_LOG_CHANNEL_ID;
 
   // Save to database
   await db.insert(modLogsTable).values({
