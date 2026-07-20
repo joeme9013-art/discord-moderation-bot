@@ -10,7 +10,7 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({
+export const pool = new Pool({n
   connectionString: process.env.DATABASE_URL, // ✅ Added comma here
   ssl: { rejectUnauthorized: false }
 });
