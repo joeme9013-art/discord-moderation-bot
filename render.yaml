@@ -5,8 +5,8 @@ services:
     region: oregon
     plan: free
     rootDir: .
-    buildCommand: npm install -g pnpm@10.26.1 --prefix=$HOME && $HOME/bin/pnpm install --ignore-scripts
-    startCommand: $HOME/bin/pnpm --filter @workspace/discord-bot run start
+    buildCommand: echo "No install needed – bot is pre-bundled"
+    startCommand: node artifacts/discord-bot/dist/index.js
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
