@@ -21,11 +21,22 @@ import { handleAuditLog } from "./events/guildAuditLogEntryCreate.js";
 import { runInactivityChecks } from "./lib/inactivity.js";
 import { startHealthServer } from "./server.js";
 
-// Start health server FIRST so Railway healthcheck passes even if startup fails
+// Trap ALL crashes so the health server (and Railway healthcheck) stays alive
+process.on("uncaughtException", (err) => {
+  console.error("[Fatal] Uncaught exception:", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[Fatal] Unhandled rejection:", reason);
+});
+
+// Start health server FIRST so Railway healthcheck passes even if bot fails
 startHealthServer();
 
 const token = process.env.DISCORD_BOT_TOKEN;
-if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
+if (!token) {
+  console.error("[Bot] DISCORD_BOT_TOKEN is not set — bot will not start");
+  process.exit(0); // exit cleanly so health server keeps running until container restarts
+}
 
 // Build command collection
 const commands = new Collection<string, Command>();

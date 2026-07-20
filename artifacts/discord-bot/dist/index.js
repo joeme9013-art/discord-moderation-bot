@@ -100492,9 +100492,18 @@ function startHealthServer() {
 }
 
 // artifacts/discord-bot/src/index.ts
+process.on("uncaughtException", (err) => {
+  console.error("[Fatal] Uncaught exception:", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[Fatal] Unhandled rejection:", reason);
+});
 startHealthServer();
 var token = process.env.DISCORD_BOT_TOKEN;
-if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
+if (!token) {
+  console.error("[Bot] DISCORD_BOT_TOKEN is not set \u2014 bot will not start");
+  process.exit(0);
+}
 var commands = new import_discord20.Collection();
 var allCommands = [
   warnCommand,
