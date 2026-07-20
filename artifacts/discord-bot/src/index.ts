@@ -21,11 +21,11 @@ import { handleAuditLog } from "./events/guildAuditLogEntryCreate.js";
 import { runInactivityChecks } from "./lib/inactivity.js";
 import { startHealthServer } from "./server.js";
 
+// Start health server FIRST so Railway healthcheck passes even if startup fails
+startHealthServer();
+
 const token = process.env.DISCORD_BOT_TOKEN;
 if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
-
-// Start HTTP health-check server for Render (no-op if PORT not set)
-startHealthServer();
 
 // Build command collection
 const commands = new Collection<string, Command>();

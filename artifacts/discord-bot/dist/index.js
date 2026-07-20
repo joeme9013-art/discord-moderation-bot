@@ -100492,9 +100492,9 @@ function startHealthServer() {
 }
 
 // artifacts/discord-bot/src/index.ts
+startHealthServer();
 var token = process.env.DISCORD_BOT_TOKEN;
 if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
-startHealthServer();
 var commands = new import_discord20.Collection();
 var allCommands = [
   warnCommand,
