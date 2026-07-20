@@ -9,13 +9,13 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-// Logs all moderation actions (bans, kicks, timeouts, warns)
+// Logs all moderation actions (bans, kicks, timeouts, warns, demotions)
 export const modLogsTable = pgTable("mod_logs", {
   id: serial("id").primaryKey(),
   guildId: text("guild_id").notNull(),
   moderatorId: text("moderator_id").notNull(),
   targetId: text("target_id").notNull(),
-  action: text("action").notNull(), // ban | kick | timeout | warn | unban
+  action: text("action").notNull(), // ban | kick | timeout | warn | unban | demote | promote
   reason: text("reason"),
   creditsAwarded: integer("credits_awarded").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -77,3 +77,26 @@ export const roleThresholdsTable = pgTable("role_thresholds", {
 });
 
 export type RoleThreshold = typeof roleThresholdsTable.$inferSelect;
+
+// Tracks automated inactivity warnings issued to moderators
+export const inactivityWarningsTable = pgTable("inactivity_warnings", {
+  id: serial("id").primaryKey(),
+  guildId: text("guild_id").notNull(),
+  userId: text("user_id").notNull(),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type InactivityWarning = typeof inactivityWarningsTable.$inferSelect;
+
+// Per-guild configuration (inactivity thresholds, etc.)
+export const guildSettingsTable = pgTable("guild_settings", {
+  id: serial("id").primaryKey(),
+  guildId: text("guild_id").notNull().unique(),
+  inactivityDays: integer("inactivity_days").notNull().default(7),
+  warningsBeforeDemote: integer("warnings_before_demote").notNull().default(3),
+  inactivityEnabled: boolean("inactivity_enabled").notNull().default(true),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type GuildSettings = typeof guildSettingsTable.$inferSelect;

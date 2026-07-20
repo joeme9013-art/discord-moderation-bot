@@ -9,12 +9,20 @@ import { removeCreditsCommand } from "./commands/removecredits.js";
 import { leaderboardCommand } from "./commands/leaderboard.js";
 import { warningsCommand } from "./commands/warnings.js";
 import { setupRolesCommand } from "./commands/setuproles.js";
+import { modprofileCommand } from "./commands/modprofile.js";
+import { demoteCommand } from "./commands/demote.js";
+import { setinactivityCommand } from "./commands/setinactivity.js";
 import { handleReady } from "./events/ready.js";
 import { handleInteractionCreate } from "./events/interactionCreate.js";
 import { handleAuditLog } from "./events/guildAuditLogEntryCreate.js";
+import { runInactivityChecks } from "./lib/inactivity.js";
+import { startHealthServer } from "./server.js";
 
 const token = process.env.DISCORD_BOT_TOKEN;
 if (!token) throw new Error("DISCORD_BOT_TOKEN is not set");
+
+// Start HTTP health-check server for Render (no-op if PORT not set)
+startHealthServer();
 
 // Build command collection
 const commands = new Collection<string, Command>();
@@ -28,26 +36,36 @@ const allCommands: Command[] = [
   leaderboardCommand,
   warningsCommand,
   setupRolesCommand,
+  modprofileCommand,
+  demoteCommand,
+  setinactivityCommand,
 ];
 for (const cmd of allCommands) {
   commands.set(cmd.data.name, cmd);
 }
 
-// NOTE: GuildMembers is a privileged intent — the bot works without it because
-// it fetches members via REST (guild.members.fetch) rather than gateway cache.
-// To enable member caching (optional), turn on "Server Members Intent" in the
-// Discord Developer Portal under your app → Bot → Privileged Gateway Intents.
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildModeration,
+    // GuildMembers is a privileged intent.
+    // Enable it in the Discord Developer Portal under Bot → Privileged Gateway Intents
+    // if you want member caching. The bot works without it via REST fetches.
   ],
 });
 
-client.once(Events.ClientReady, (c) => handleReady(c));
+client.once(Events.ClientReady, async (c) => {
+  await handleReady(c, allCommands);
+
+  // Run inactivity check on startup, then every 12 hours
+  await runInactivityChecks(client);
+  setInterval(() => runInactivityChecks(client), 12 * 60 * 60 * 1000);
+});
+
 client.on(Events.InteractionCreate, (i) =>
   handleInteractionCreate(i, commands)
 );
+
 client.on(Events.GuildAuditLogEntryCreate, (entry, guild) =>
   handleAuditLog(entry, guild)
 );
