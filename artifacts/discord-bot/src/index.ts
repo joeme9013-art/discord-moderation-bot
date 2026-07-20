@@ -14,6 +14,7 @@ import { demoteCommand } from "./commands/demote.js";
 import { setinactivityCommand } from "./commands/setinactivity.js";
 import { rosterCommand } from "./commands/roster.js";
 import { setupCommand } from "./commands/setup.js";
+import { commendCommand } from "./commands/commend.js";
 import { handleReady } from "./events/ready.js";
 import { handleInteractionCreate } from "./events/interactionCreate.js";
 import { handleAuditLog } from "./events/guildAuditLogEntryCreate.js";
@@ -43,6 +44,7 @@ const allCommands: Command[] = [
   setinactivityCommand,
   rosterCommand,
   setupCommand,
+  commendCommand,
 ];
 for (const cmd of allCommands) {
   commands.set(cmd.data.name, cmd);

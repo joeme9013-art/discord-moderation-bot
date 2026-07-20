@@ -6,15 +6,14 @@
 import http from "node:http";
 
 export function startHealthServer(): void {
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : undefined;
-  if (!port) return; // Skip locally unless PORT is set
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
   const server = http.createServer((_req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "ok", service: "discord-moderation-bot" }));
   });
 
-  server.listen(port, () => {
+  server.listen(port, "0.0.0.0", () => {
     console.log(`[Health] HTTP server listening on port ${port}`);
   });
 }
